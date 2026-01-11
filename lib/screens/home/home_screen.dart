@@ -1,4 +1,3 @@
-import 'package:azkari_app/screens/azkar/azkar_categories_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/common/custom_app_bar.dart';
@@ -18,6 +17,7 @@ import '../../widgets/home/question_of_day_section.dart';
 import '../../widgets/home/prayer_of_day_section.dart';
 import '../../widgets/home/beautiful_names_section.dart';
 import '../quran/quran_screen.dart';
+import '../azkar/azkar_screen.dart';
 import '../more/more_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -42,10 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (index == 3) {
       // Navigate to Azkar screen
       Navigator.push(
-      context,
-      MaterialPageRoute(
-         builder: (context) => const AzkarCategoriesPage(),
-      ),
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AzkarScreen(),
+        ),
       );
     } else if (index == 4) {
       // Navigate to More screen

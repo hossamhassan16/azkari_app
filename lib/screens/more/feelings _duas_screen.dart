@@ -37,7 +37,7 @@ class _FeelingDuasScreenState extends State<FeelingDuasScreen> {
         return DuaItemModel(
           id: '${widget.feelings[i].feeling}_${entry.key}',
           content: entry.value,
-          initialCount: 1,
+          count: 1,
           currentCount: 1,
         );
       }).toList();
@@ -67,7 +67,7 @@ class _FeelingDuasScreenState extends State<FeelingDuasScreen> {
     setState(() {
       _duasMap[_currentFeelingIndex] =
           _duasMap[_currentFeelingIndex]!.map((dua) {
-        return dua.copyWith(currentCount: dua.initialCount);
+        return dua.copyWith(currentCount: dua.count);
       }).toList();
     });
   }
