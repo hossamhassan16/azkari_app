@@ -3,6 +3,7 @@ import 'core/constants/app_colors.dart';
 import 'screens/home/home_screen.dart';
 import 'services/quran_settings_service.dart';
 import 'services/azkar_service.dart';
+import 'services/quran_duas_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +11,7 @@ void main() async {
   // Initialize services
   await AzkarService().init();
   await QuranSettingsService().init();
+  await QuranDuasService().init();
 
   runApp(const MyApp());
 }

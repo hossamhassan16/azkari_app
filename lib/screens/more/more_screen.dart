@@ -1,5 +1,7 @@
 import 'package:azkari_app/screens/more/allah_names_screen.dart';
 import 'package:azkari_app/screens/more/feelings_screen.dart';
+import 'package:azkari_app/screens/more/quran_duas_screen.dart';
+import 'package:azkari_app/screens/more/my_azkar_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/navigation/bottom_nav_bar.dart';
@@ -116,7 +118,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.edit_note,
                     label: 'أذكاري',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyAzkarScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.menu_book,
@@ -175,7 +184,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.menu_book_outlined,
                     label: 'ادعية قرآنية',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const QuranDuasScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
