@@ -5,6 +5,7 @@ import 'package:azkari_app/screens/more/feelings_screen.dart';
 import 'package:azkari_app/screens/more/hamd_screen.dart';
 import 'package:azkari_app/screens/more/istighfar_screen.dart';
 import 'package:azkari_app/screens/more/nabaywa_duas_screen.dart';
+import 'package:azkari_app/screens/more/nawawi_hadiths_list_screen.dart';
 import 'package:azkari_app/screens/more/quran_duas_screen.dart';
 import 'package:azkari_app/screens/more/my_azkar_screen.dart';
 import 'package:azkari_app/screens/more/roqaya_sharyaa_screen.dart';
@@ -219,7 +220,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.book,
                     label: 'الاربعون النووية',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NawawiHadithsListScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.person,
@@ -256,6 +264,27 @@ class MoreScreen extends StatelessWidget {
                         ),
                       );
                     },
+                  ),
+                  // Row 6
+                  MoreItemButton(
+                    icon: Icons.book,
+                    label: 'سنن الجمعة',
+                    onTap: () {},
+                  ),
+                  MoreItemButton(
+                    icon: Icons.person,
+                    label: 'رمضان',
+                    onTap: () {},
+                  ),
+                  MoreItemButton(
+                    icon: Icons.star_border,
+                    label: 'ختمة',
+                    onTap: () {},
+                  ),
+                  MoreItemButton(
+                    icon: Icons.menu_book_outlined,
+                    label: 'تطبيقاتنا',
+                    onTap: () {},
                   ),
                 ],
               ),
