@@ -1,8 +1,10 @@
 import 'package:azkari_app/screens/more/allah_names_screen.dart';
+import 'package:azkari_app/screens/more/anbyaa_duas_screen.dart';
 import 'package:azkari_app/screens/more/feelings_screen.dart';
 import 'package:azkari_app/screens/more/nabaywa_duas_screen.dart';
 import 'package:azkari_app/screens/more/quran_duas_screen.dart';
 import 'package:azkari_app/screens/more/my_azkar_screen.dart';
+import 'package:azkari_app/screens/more/tasbeh_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/navigation/bottom_nav_bar.dart';
@@ -163,7 +165,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.whatshot_outlined,
                     label: 'تسبيح',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TasbehScreen(),
+                        ),
+                      );
+                    },
                   ),
 
                   // Row 5
@@ -175,7 +184,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.person,
                     label: 'ادعية الانبياء',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AnbyaaDuasScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.star_border,

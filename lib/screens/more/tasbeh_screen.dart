@@ -1,19 +1,19 @@
-import 'package:azkari_app/models/nabawya_dua_model.dart';
+import 'package:azkari_app/models/tasbeh_model.dart';
+import 'package:azkari_app/services/tasbeh_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
-import '../../services/nabaywa_dua_service.dart';
 
-class NabaywaDuasScreen extends StatefulWidget {
-  const NabaywaDuasScreen({super.key});
+class TasbehScreen extends StatefulWidget {
+  const TasbehScreen({super.key});
 
   @override
-  State<NabaywaDuasScreen> createState() => _NabaywaDuasScreenState();
+  State<TasbehScreen> createState() => _TasbehScreenState();
 }
 
-class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
-  final NabawyaDuasService _service = NabawyaDuasService();
-  List<NabawyaDuaModel> _duas = [];
+class _TasbehScreenState extends State<TasbehScreen> {
+  final TasbehService _service = TasbehService();
+  List<TasbehModel> _duas = [];
   bool _isLoading = true;
   double _fontSize = 24.0;
 
@@ -25,7 +25,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
 
   Future<void> _loadDuas() async {
     try {
-      final duas = await _service.loadNabawyaDuas();
+      final duas = await _service.loadQuranDuas();
       if (mounted) {
         setState(() {
           _duas = duas;
@@ -44,7 +44,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
     }
   }
 
-  void _showDuaMenu(NabawyaDuaModel dua) {
+  void _showDuaMenu(TasbehModel dua) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -178,7 +178,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'أدعية نبوية',
+          'تسبيح',
           style: TextStyle(
             color: AppColors.white,
             fontSize: 20,
@@ -200,7 +200,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
     );
   }
 
-  Widget _buildDuaCard(NabawyaDuaModel dua) {
+  Widget _buildDuaCard(TasbehModel dua) {
     final isCompleted = dua.currentCount == 0;
 
     return Container(
