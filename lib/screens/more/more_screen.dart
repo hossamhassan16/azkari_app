@@ -7,6 +7,7 @@ import 'package:azkari_app/screens/more/istighfar_screen.dart';
 import 'package:azkari_app/screens/more/nabaywa_duas_screen.dart';
 import 'package:azkari_app/screens/more/quran_duas_screen.dart';
 import 'package:azkari_app/screens/more/my_azkar_screen.dart';
+import 'package:azkari_app/screens/more/roqaya_sharyaa_screen.dart';
 import 'package:azkari_app/screens/more/tasbeh_screen.dart';
 import 'package:azkari_app/screens/quran/quran_screen.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.sentiment_dissatisfied_outlined,
                     label: 'الرقية الشرعية',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RoqayaSharyaaScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.person_outline,

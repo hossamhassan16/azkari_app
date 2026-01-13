@@ -1,22 +1,19 @@
-import 'package:azkari_app/models/nabawya_dua_model.dart';
+import 'package:azkari_app/models/roqaya_sharyaa_model.dart';
+import 'package:azkari_app/services/roqaya_sharyaa_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
-import '../../services/nabaywa_dua_service.dart';
-import '../../services/quran_duas_service.dart';
-import '../../models/quran_dua_model.dart';
 
-class NabaywaDuasScreen extends StatefulWidget {
-  const NabaywaDuasScreen({super.key});
+class RoqayaSharyaaScreen extends StatefulWidget {
+  const RoqayaSharyaaScreen({super.key});
 
   @override
-  State<NabaywaDuasScreen> createState() => _NabaywaDuasScreenState();
+  State<RoqayaSharyaaScreen> createState() => _RoqayaSharyaaScreenState();
 }
 
-class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
-  final NabawyaDuasService _service = NabawyaDuasService();
-  final QuranDuasService _quranDuasService = QuranDuasService();
-  List<NabawyaDuaModel> _duas = [];
+class _RoqayaSharyaaScreenState extends State<RoqayaSharyaaScreen> {
+  final RoqayaSharyaaService _service = RoqayaSharyaaService();
+  List<RoqayaSharyaaModel> _duas = [];
   bool _isLoading = true;
   double _fontSize = 24.0;
 
@@ -28,7 +25,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
 
   Future<void> _loadDuas() async {
     try {
-      final duas = await _service.loadNabawyaDuas();
+      final duas = await _service.loadRoqayaSharyaaDuas();
       if (mounted) {
         setState(() {
           _duas = duas;
@@ -47,7 +44,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
     }
   }
 
-  void _showDuaMenu(NabawyaDuaModel dua) {
+  void _showDuaMenu(RoqayaSharyaaModel dua) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -77,15 +74,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
               icon: Icons.bookmark_add_outlined,
               label: 'إضافة الى اذكاري',
               onTap: () async {
-                // Convert to QuranDuaModel
-                final quranDua = QuranDuaModel(
-                  id: dua.id,
-                  content: dua.content,
-                  reference: dua.reference,
-                  initialCount: dua.initialCount,
-                  currentCount: dua.currentCount,
-                );
-                await _quranDuasService.addToMyAzkar(quranDua);
+                await _service.addToMyAzkar(dua);
                 if (mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -189,7 +178,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'أدعية نبوية',
+          'الحمد',
           style: TextStyle(
             color: AppColors.white,
             fontSize: 20,
@@ -211,7 +200,7 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
     );
   }
 
-  Widget _buildDuaCard(NabawyaDuaModel dua) {
+  Widget _buildDuaCard(RoqayaSharyaaModel dua) {
     final isCompleted = dua.currentCount == 0;
 
     return Container(
@@ -249,17 +238,6 @@ class _NabaywaDuasScreenState extends State<NabaywaDuasScreen> {
                     height: 1.8,
                   ),
                 ),
-                if (dua.reference.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    dua.reference,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.greyText,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

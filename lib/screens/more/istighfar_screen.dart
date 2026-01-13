@@ -3,6 +3,8 @@ import 'package:azkari_app/services/istighfar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
+import '../../services/quran_duas_service.dart';
+import '../../models/quran_dua_model.dart';
 
 class IstighfarScreen extends StatefulWidget {
   const IstighfarScreen({super.key});
@@ -13,6 +15,7 @@ class IstighfarScreen extends StatefulWidget {
 
 class _IstighfarScreenState extends State<IstighfarScreen> {
   final IstighfarService _service = IstighfarService();
+  final QuranDuasService _quranDuasService = QuranDuasService();
   List<IstighfarModel> _duas = [];
   bool _isLoading = true;
   double _fontSize = 24.0;
@@ -74,7 +77,15 @@ class _IstighfarScreenState extends State<IstighfarScreen> {
               icon: Icons.bookmark_add_outlined,
               label: 'إضافة الى اذكاري',
               onTap: () async {
-                await _service.addToMyAzkar(dua);
+                // Convert to QuranDuaModel
+                final quranDua = QuranDuaModel(
+                  id: dua.id,
+                  content: dua.content,
+                  reference: dua.reference,
+                  initialCount: dua.initialCount,
+                  currentCount: dua.currentCount,
+                );
+                await _quranDuasService.addToMyAzkar(quranDua);
                 if (mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
