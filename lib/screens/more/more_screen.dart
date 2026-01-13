@@ -1,5 +1,6 @@
 import 'package:azkari_app/screens/more/allah_names_screen.dart';
 import 'package:azkari_app/screens/more/feelings_screen.dart';
+import 'package:azkari_app/screens/more/nabaywa_duas_screen.dart';
 import 'package:azkari_app/screens/more/quran_duas_screen.dart';
 import 'package:azkari_app/screens/more/my_azkar_screen.dart';
 import 'package:flutter/material.dart';
@@ -179,7 +180,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.star_border,
                     label: 'ادعية نبوية',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NabaywaDuasScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.menu_book_outlined,
