@@ -11,6 +11,7 @@ import 'package:azkari_app/screens/more/my_azkar_screen.dart';
 import 'package:azkari_app/screens/more/roqaya_sharyaa_screen.dart';
 import 'package:azkari_app/screens/more/tasbeh_screen.dart';
 import 'package:azkari_app/screens/quran/quran_screen.dart';
+import 'package:azkari_app/screens/rosary/electronic_rosary_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/navigation/bottom_nav_bar.dart';
@@ -83,7 +84,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.circle_outlined,
                     label: 'المسبحة الالكترونية',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ElectronicRosaryScreen(),
+                        ),
+                      );
+                    },
                   ),
 
                   // Row 2

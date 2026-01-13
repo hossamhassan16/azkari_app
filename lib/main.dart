@@ -4,6 +4,7 @@ import 'screens/home/home_screen.dart';
 import 'services/quran_settings_service.dart';
 import 'services/azkar_service.dart';
 import 'services/quran_duas_service.dart';
+import 'services/tasbeh_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +13,7 @@ void main() async {
   await AzkarService().init();
   await QuranSettingsService().init();
   await QuranDuasService().init();
+  await TasbehService().init();
 
   runApp(const MyApp());
 }

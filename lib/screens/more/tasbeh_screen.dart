@@ -275,7 +275,7 @@ class _TasbehScreenState extends State<TasbehScreen> {
                       HapticFeedback.heavyImpact();
                     }
 
-                    setState(() {});
+                    await _loadDuas();
                   }
                 : null,
             child: Container(
