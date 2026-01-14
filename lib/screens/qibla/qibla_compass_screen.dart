@@ -22,7 +22,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
         backgroundColor: AppColors.cardBackground,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
@@ -191,6 +191,14 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
     final compassRotation = (qiblahDirection.direction * (math.pi / 180) * -1);
     final qiblaAngle = (qiblahDirection.qiblah * (math.pi / 180) * -1);
 
+    // Check if aligned with Qibla (offset is the angle difference from Qibla)
+    // final isAligned = qiblahDirection.offset.abs() <= 10;
+    final isAligned = qiblahDirection.offset.abs() <= 10 ||
+        (qiblahDirection.direction - qiblahDirection.qiblah).abs() <= 10;
+
+    // Debug
+    print('Offset: ${qiblahDirection.offset}, IsAligned: $isAligned');
+
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -212,7 +220,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
                 ),
                 child: const Icon(
                   Icons.mosque,
-                  color: AppColors.primaryGreen,
+                  color: Colors.white,
                   size: 32,
                 ),
               ),
@@ -256,7 +264,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
                     angle: qiblaAngle,
                     child: CustomPaint(
                       size: const Size(320, 320),
-                      painter: ArrowPainter(),
+                      painter: ArrowPainter(isAligned: isAligned),
                     ),
                   ),
                 ],
@@ -382,34 +390,35 @@ class CompassPainter extends CustomPainter {
 
 // Arrow painter pointing to Qibla
 class ArrowPainter extends CustomPainter {
+  final bool isAligned;
+
+  ArrowPainter({this.isAligned = false});
+
   @override
   void paint(Canvas canvas, Size size) {
+    // اختيار اللون بناءً على الحالة
     final paint = Paint()
-      ..color = Colors.red
+      ..color = isAligned ? AppColors.primaryGreen : Colors.red
       ..style = PaintingStyle.fill;
 
     final center = Offset(size.width / 2, size.height / 2);
     final path = Path();
 
-    // Draw arrow pointing up
-    path.moveTo(center.dx, center.dy - 120); // Top point
-    path.lineTo(center.dx - 15, center.dy - 90); // Left base
-    path.lineTo(center.dx - 5, center.dy - 90); // Left inner
-    path.lineTo(center.dx - 5, center.dy - 60); // Left shaft
-    path.lineTo(center.dx + 5, center.dy - 60); // Right shaft
-    path.lineTo(center.dx + 5, center.dy - 90); // Right inner
-    path.lineTo(center.dx + 15, center.dy - 90); // Right base
+    // رسم السهم
+    path.moveTo(center.dx, center.dy - 120);
+    path.lineTo(center.dx - 15, center.dy - 90);
+    path.lineTo(center.dx - 5, center.dy - 90);
+    path.lineTo(center.dx - 5, center.dy - 60);
+    path.lineTo(center.dx + 5, center.dy - 60);
+    path.lineTo(center.dx + 5, center.dy - 90);
+    path.lineTo(center.dx + 15, center.dy - 90);
     path.close();
 
     canvas.drawPath(path, paint);
-
-    // Draw shadow
-    final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.3)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-    canvas.drawPath(path, shadowPaint);
   }
 
   @override
-  bool shouldRepaint(ArrowPainter oldDelegate) => false;
+  bool shouldRepaint(covariant ArrowPainter oldDelegate) {
+    return oldDelegate.isAligned != isAligned;
+  }
 }
