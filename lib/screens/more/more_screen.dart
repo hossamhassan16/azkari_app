@@ -10,6 +10,7 @@ import 'package:azkari_app/screens/more/quran_duas_screen.dart';
 import 'package:azkari_app/screens/more/my_azkar_screen.dart';
 import 'package:azkari_app/screens/more/roqaya_sharyaa_screen.dart';
 import 'package:azkari_app/screens/more/tasbeh_screen.dart';
+import 'package:azkari_app/screens/qibla/qibla_compass_screen.dart';
 import 'package:azkari_app/screens/quran/quran_screen.dart';
 import 'package:azkari_app/screens/rosary/electronic_rosary_screen.dart';
 import 'package:flutter/material.dart';
@@ -166,7 +167,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.explore,
                     label: 'بوصلة القبلة',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const QiblaCompassScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.check_box_outlined,
