@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "570814061119",
+    "project_id": "azkari-app-83f34",
+    "storage_bucket": "azkari-app-83f34.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:570814061119:android:c4e13094bc48c902b8f68a",
+        "android_client_info": {
+          "package_name": "com.example.azkari_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdmA4ycGXuA2oVk73xqbf7YQS23CTiwM0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

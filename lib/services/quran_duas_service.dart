@@ -29,7 +29,8 @@ class QuranDuasService {
       _cachedDuas = duasList
           .asMap()
           .entries
-          .map((entry) => QuranDuaModel.fromJson(entry.value.toString(), entry.key))
+          .map((entry) =>
+              QuranDuaModel.fromJson(entry.value.toString(), entry.key))
           .toList();
 
       // Load counter progress
@@ -89,13 +90,15 @@ class QuranDuasService {
     if (myAzkarJson == null) return [];
 
     final List<dynamic> duasList = json.decode(myAzkarJson);
-    return duasList.map((duaJson) => QuranDuaModel.fromSavedJson(duaJson)).toList();
+    return duasList
+        .map((duaJson) => QuranDuaModel.fromSavedJson(duaJson))
+        .toList();
   }
 
   // Add dua to "My Azkar"
   Future<void> addToMyAzkar(QuranDuaModel dua) async {
     final currentList = await getMyAzkar();
-    
+
     // Check if already exists
     if (currentList.any((d) => d.id == dua.id)) {
       return; // Already added
@@ -110,7 +113,7 @@ class QuranDuasService {
   Future<void> removeFromMyAzkar(String duaId) async {
     final currentList = await getMyAzkar();
     currentList.removeWhere((d) => d.id == duaId);
-    
+
     final jsonString = json.encode(currentList.map((d) => d.toJson()).toList());
     await _prefs?.setString('my_azkar_duas', jsonString);
   }
@@ -118,14 +121,14 @@ class QuranDuasService {
   // Save progress for My Azkar duas
   Future<void> saveMyAzkarProgress(String duaId, int count) async {
     final currentList = await getMyAzkar();
-    
+
     for (int i = 0; i < currentList.length; i++) {
       if (currentList[i].id == duaId) {
         currentList[i] = currentList[i].copyWith(currentCount: count);
         break;
       }
     }
-    
+
     final jsonString = json.encode(currentList.map((d) => d.toJson()).toList());
     await _prefs?.setString('my_azkar_duas', jsonString);
   }
