@@ -1,42 +1,51 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
+import 'package:hijri/hijri_calendar.dart';
+import 'package:intl/intl.dart';
 
-class DateSection extends StatelessWidget {
+import '../../core/constants/app_colors.dart';
+
+class DateSection extends StatefulWidget {
   const DateSection({super.key});
+
+  @override
+  State<DateSection> createState() => _DateSectionState();
+}
+
+class _DateSectionState extends State<DateSection> {
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = DateTime.now();
+  }
+
+  String _formatDate() {
+    final hijri = HijriCalendar.fromDate(_selectedDate);
+
+    final gregorianDate = DateFormat(
+      'dd - MMMM - yyyy',
+      'ar',
+    ).format(_selectedDate);
+
+    return '${hijri.hDay} - '
+        '${hijri.longMonthName} - '
+        '${hijri.hYear}'
+        ' ($gregorianDate)';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'اليوم: 14 - رجب- 1447 (03 - يناير- 2026)', // Placeholder date
-            style: TextStyle(
-              color: AppColors.white,
-              fontSize: 14,
-            ),
+      child: Center(
+        child: Text(
+          _formatDate(),
+          style: const TextStyle(
+            color: AppColors.white,
+            fontSize: 14,
           ),
-          TextButton.icon(
-            onPressed: () {
-              // Handle edit date
-            },
-            icon: const Icon(
-              Icons.edit,
-              color: AppColors.white,
-              size: 18,
-            ),
-            label: const Text(
-              AppStrings.edit,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

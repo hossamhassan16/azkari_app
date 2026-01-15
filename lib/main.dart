@@ -6,9 +6,13 @@ import 'services/azkar_service.dart';
 import 'services/quran_duas_service.dart';
 import 'services/tasbeh_service.dart';
 import 'services/story_service.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
+  Intl.defaultLocale = 'ar';
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ar');
 
   // Initialize services
   await AzkarService().init();
