@@ -2,6 +2,7 @@ import 'package:azkari_app/screens/azkar/azkar_screen.dart';
 import 'package:azkari_app/screens/more/allah_names_screen.dart';
 import 'package:azkari_app/screens/more/anbyaa_duas_screen.dart';
 import 'package:azkari_app/screens/more/feelings_screen.dart';
+import 'package:azkari_app/screens/more/friday_sona_screen.dart';
 import 'package:azkari_app/screens/more/hamd_screen.dart';
 import 'package:azkari_app/screens/more/istighfar_screen.dart';
 import 'package:azkari_app/screens/more/nabaywa_duas_screen.dart';
@@ -286,7 +287,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.book,
                     label: 'سنن الجمعة',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FridaySonaScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.person,

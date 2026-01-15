@@ -249,7 +249,7 @@ class _MyAzkarScreenState extends State<MyAzkarScreen> {
                     color: AppColors.white,
                     fontSize: _fontSize,
                     height: 1.8,
-                    fontFamily: 'AmiriQuran',
+                    // fontFamily: 'AmiriQuran',
                   ),
                 ),
                 if (dua.reference.isNotEmpty) ...[
@@ -272,19 +272,21 @@ class _MyAzkarScreenState extends State<MyAzkarScreen> {
                 ? () async {
                     final newCount = dua.currentCount - 1;
                     await _service.saveMyAzkarProgress(dua.id, newCount);
-                    
+
                     // Vibrate when reaching zero
                     if (newCount == 0) {
                       HapticFeedback.heavyImpact();
                     }
-                    
+
                     _loadMyAzkar(); // Reload to update UI
                   }
                 : null,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: isCompleted ? Colors.red : const Color.fromARGB(255, 49, 113, 52),
+                color: isCompleted
+                    ? Colors.red
+                    : const Color.fromARGB(255, 49, 113, 52),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(12),
                   bottomRight: Radius.circular(12),

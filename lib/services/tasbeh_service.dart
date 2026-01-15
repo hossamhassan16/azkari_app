@@ -197,10 +197,10 @@ class TasbehService {
 
     try {
       final String jsonString =
-          await rootBundle.loadString('assets/data/tasbeh.json');
+          await rootBundle.loadString('assets/data/tasbeeh.json');
       final Map<String, dynamic> data = json.decode(jsonString);
 
-      final List<dynamic> duasList = data['tasbeh'] as List<dynamic>;
+      final List<dynamic> duasList = data['duas'] as List<dynamic>;
       _cachedTasbehDuas = duasList
           .asMap()
           .entries
