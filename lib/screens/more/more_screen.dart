@@ -8,6 +8,7 @@ import 'package:azkari_app/screens/more/nabaywa_duas_screen.dart';
 import 'package:azkari_app/screens/more/nawawi_hadiths_list_screen.dart';
 import 'package:azkari_app/screens/more/quran_duas_screen.dart';
 import 'package:azkari_app/screens/more/my_azkar_screen.dart';
+import 'package:azkari_app/screens/more/ramadan_categories_screen.dart';
 import 'package:azkari_app/screens/more/roqaya_sharyaa_screen.dart';
 import 'package:azkari_app/screens/more/tasbeh_screen.dart';
 import 'package:azkari_app/screens/qibla/qibla_compass_screen.dart';
@@ -290,7 +291,14 @@ class MoreScreen extends StatelessWidget {
                   MoreItemButton(
                     icon: Icons.person,
                     label: 'رمضان',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RamadanPage(),
+                        ),
+                      );
+                    },
                   ),
                   MoreItemButton(
                     icon: Icons.star_border,
