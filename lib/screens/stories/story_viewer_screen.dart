@@ -66,6 +66,23 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     super.dispose();
   }
 
+  // Calculate font size based on content length to prevent overflow
+  double _calculateFontSize() {
+    final contentLength = widget.story.content.length;
+    
+    if (contentLength < 100) {
+      return 28.0; // Short content
+    } else if (contentLength < 200) {
+      return 24.0; // Medium content
+    } else if (contentLength < 350) {
+      return 20.0; // Long content
+    } else if (contentLength < 500) {
+      return 18.0; // Very long content
+    } else {
+      return 16.0; // Extremely long content
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,14 +126,14 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                       ),
                       const SizedBox(height: 32),
                       
-                      // Content (Arabic RTL)
+                      // Content (Arabic RTL) with dynamic font size
                       Directionality(
                         textDirection: TextDirection.rtl,
                         child: Text(
                           widget.story.content,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 28,
+                            fontSize: _calculateFontSize(), // ✅ Dynamic font size
                             height: 2.0,
                             fontFamily: 'Amiri',
                           ),

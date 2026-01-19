@@ -37,6 +37,27 @@ class StoryModel {
     }
   }
 
+  // Get ring color based on state (Instagram-style)
+  Color getRingColor(Color primaryColor) {
+    // White ring → viewed story
+    if (isViewed) {
+      return Colors.white;
+    }
+    
+    // Check if 24h passed since last update
+    final now = DateTime.now();
+    final diff = now.difference(lastUpdated);
+    final has24hPassed = diff.inHours >= 24;
+    
+    // Green ring → new story (24h passed and not opened yet)
+    if (has24hPassed) {
+      return Colors.green;
+    }
+    
+    // Primary color ring → normal unviewed story
+    return primaryColor;
+  }
+
   // Convert to JSON for storage
   Map<String, dynamic> toJson() {
     return {
