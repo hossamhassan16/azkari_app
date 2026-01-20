@@ -98,6 +98,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         title: const Text('الإشعارات'),
         backgroundColor: AppColors.cardBackground,
         actions: [
+          // Test notification button (for debugging)
+          // IconButton(
+          //   icon: const Icon(Icons.notification_add, color: Colors.amber),
+          //   onPressed: () async {
+          //     await _notificationService.showTestNotification();
+          //     ScaffoldMessenger.of(context).showSnackBar(
+          //       const SnackBar(
+          //         content: Text('تم إرسال إشعار تجريبي فوري!'),
+          //         duration: Duration(seconds: 2),
+          //       ),
+          //     );
+          //     // Reload after a moment
+          //     await Future.delayed(const Duration(seconds: 1));
+          //     _loadNotifications();
+          //   },
+          //   tooltip: 'إشعار تجريبي فوري',
+          // ),
           if (_notifications.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_outline),
@@ -197,7 +214,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // Title
                   Expanded(
                     child: Text(
@@ -205,11 +222,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
-                        fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                        fontWeight:
+                            isRead ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
                   ),
-                  
+
                   // Unread indicator
                   if (!isRead)
                     Container(
@@ -222,9 +240,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Content (Arabic RTL)
               Directionality(
                 textDirection: ui.TextDirection.rtl,
@@ -239,9 +257,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   textAlign: TextAlign.right,
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Timestamp
               Text(
                 _formatTimestamp(timestamp),
@@ -261,8 +279,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     switch (type) {
       case 'duaa':
         return Icons.pan_tool_alt;
+      case 'morning':
       case 'morning_azkar':
         return Icons.wb_sunny;
+      case 'evening':
       case 'evening_azkar':
         return Icons.nightlight_round;
       default:
@@ -274,8 +294,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     switch (type) {
       case 'duaa':
         return AppColors.primaryGreen;
+      case 'morning':
       case 'morning_azkar':
         return Colors.orange;
+      case 'evening':
       case 'evening_azkar':
         return Colors.purple;
       default:

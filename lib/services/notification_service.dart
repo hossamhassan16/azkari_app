@@ -21,6 +21,11 @@ class NotificationService {
   // Keys for SharedPreferences
   static const String _notificationsKey = 'saved_notifications';
   static const String _lastDuaaKey = 'last_duaa_notification';
+  static const String _lastDuaaDeliveryKey = 'last_duaa_delivery_date';
+  static const String _lastMorningAzkarDeliveryKey =
+      'last_morning_azkar_delivery_date';
+  static const String _lastEveningAzkarDeliveryKey =
+      'last_evening_azkar_delivery_date';
 
   // Notification IDs
   static const int duaaNotificationId = 100;
@@ -65,6 +70,11 @@ class NotificationService {
 
     // Schedule daily notifications
     await scheduleDailyDuaaNotification();
+    await scheduleMorningAzkarNotification(); // 9 AM
+    await scheduleEveningAzkarNotification(); // 7 PM
+
+    // Check if any notifications should have been delivered today
+    await _checkAndSaveOverdueNotifications();
 
     if (kDebugMode) {
       print('✅ NotificationService initialized successfully');
@@ -91,13 +101,42 @@ class NotificationService {
   }
 
   // Handle notification tap
-  void _onNotificationTapped(NotificationResponse response) {
+  void _onNotificationTapped(NotificationResponse response) async {
     if (kDebugMode) {
       print('🔔 Notification tapped: ${response.payload}');
     }
 
-    // The payload will be handled by the app navigation
-    // We'll implement this in main.dart
+    // Parse payload and save to history (only once per day)
+    if (response.payload != null) {
+      try {
+        final payload = json.decode(response.payload!);
+        final type = payload['type'] as String?;
+        final content = payload['content'] as String?;
+        final screen = payload['screen'] as String?;
+
+        if (kDebugMode) {
+          print('📍 Navigation requested to: $screen');
+          print('📝 Notification type: $type');
+        }
+
+        // Save to history only if not already saved today
+        if (type != null && content != null) {
+          await _saveNotificationIfNotToday(type, content);
+        }
+
+        // TODO: Implement navigation using GlobalKey<NavigatorState>
+        // For now, the payload is parsed and ready
+        // Payload contains:
+        // - 'screen': 'azkar' or 'notifications'
+        // - 'type': 'morning_azkar', 'evening_azkar', 'duaa'
+        // - 'category': Category name for azkar
+        // - 'content': The actual text
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error parsing notification payload: $e');
+        }
+      }
+    }
   }
 
   // Schedule daily Duaa notification at 3 PM
@@ -120,23 +159,23 @@ class NotificationService {
         return;
       }
 
+      // final scheduledDate = now.add(const Duration(minutes: 2));
       // // Schedule for 3 PM daily
+
       final now = tz.TZDateTime.now(tz.local);
-      final scheduledDate = now.add(const Duration(minutes: 2));
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        13, // 3 PM
+        0,
+      );
 
-      // var scheduledDate = tz.TZDateTime(
-      //   tz.local,
-      //   now.year,
-      //   now.month,
-      //   now.day,
-      //   15, // 3 PM
-      //   0,
-      // );
-
-      // // If 3 PM already passed today, schedule for tomorrow
-      // if (scheduledDate.isBefore(now)) {
-      //   scheduledDate = scheduledDate.add(const Duration(days: 1));
-      // }
+      // If 3 PM already passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
 
       await _notificationsPlugin.zonedSchedule(
         duaaNotificationId,
@@ -172,8 +211,7 @@ class NotificationService {
         }),
       );
 
-      // Save to notification history
-      await _saveNotification('دعاء اليوم', duaa, 'duaa');
+      // DO NOT save to history here - will be saved when notification is delivered
 
       if (kDebugMode) {
         print(
@@ -182,6 +220,174 @@ class NotificationService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error scheduling Duaa notification: $e');
+      }
+    }
+  }
+
+  // Schedule morning Azkar notification at 9 AM
+  Future<void> scheduleMorningAzkarNotification() async {
+    try {
+      if (kDebugMode) {
+        print('🌅 Scheduling morning Azkar notification at 9 AM...');
+      }
+
+      // Cancel previous notification
+      await _notificationsPlugin.cancel(morningAzkarId);
+
+      // Load random morning azkar
+      final azkar = await _getRandomAzkar('أذكار الصباح');
+
+      if (azkar == null || azkar.isEmpty) {
+        if (kDebugMode) {
+          print('⚠️ No morning azkar found to schedule');
+        }
+        return;
+      }
+
+      // Schedule for 9 AM daily
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        9, // 9 AM
+        0,
+      );
+
+      // If 9 AM already passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await _notificationsPlugin.zonedSchedule(
+        morningAzkarId,
+        '🌅 أذكار الصباح',
+        azkar,
+        scheduledDate,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'morning_azkar',
+            'أذكار الصباح',
+            channelDescription: 'إشعار يومي بأذكار الصباح',
+            importance: Importance.high,
+            priority: Priority.high,
+            styleInformation: BigTextStyleInformation(
+              azkar,
+              contentTitle: '🌅 أذكار الصباح',
+              summaryText: 'أذكاري',
+            ),
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: json.encode({
+          'type': 'morning_azkar',
+          'screen': 'azkar',
+          'category': 'أذكار الصباح',
+          'content': azkar,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      );
+
+      // DO NOT save to history here - will be saved when notification is delivered
+
+      if (kDebugMode) {
+        print(
+            '✅ Morning Azkar notification scheduled for ${scheduledDate.hour}:${scheduledDate.minute}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error scheduling morning Azkar notification: $e');
+      }
+    }
+  }
+
+  // Schedule evening Azkar notification at 7 PM
+  Future<void> scheduleEveningAzkarNotification() async {
+    try {
+      if (kDebugMode) {
+        print('🌙 Scheduling evening Azkar notification at 7 PM...');
+      }
+
+      // Cancel previous notification
+      await _notificationsPlugin.cancel(eveningAzkarId);
+
+      // Load random evening azkar
+      final azkar = await _getRandomAzkar('أذكار المساء');
+
+      if (azkar == null || azkar.isEmpty) {
+        if (kDebugMode) {
+          print('⚠️ No evening azkar found to schedule');
+        }
+        return;
+      }
+
+      // Schedule for 7 PM daily
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        19, // 7 PM (19:00)
+        0,
+      );
+
+      // If 7 PM already passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await _notificationsPlugin.zonedSchedule(
+        eveningAzkarId,
+        '🌙 أذكار المساء',
+        azkar,
+        scheduledDate,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'evening_azkar',
+            'أذكار المساء',
+            channelDescription: 'إشعار يومي بأذكار المساء',
+            importance: Importance.high,
+            priority: Priority.high,
+            styleInformation: BigTextStyleInformation(
+              azkar,
+              contentTitle: '🌙 أذكار المساء',
+              summaryText: 'أذكاري',
+            ),
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: json.encode({
+          'type': 'evening_azkar',
+          'screen': 'azkar',
+          'category': 'أذكار المساء',
+          'content': azkar,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      );
+
+      // DO NOT save to history here - will be saved when notification is delivered
+
+      if (kDebugMode) {
+        print(
+            '✅ Evening Azkar notification scheduled for ${scheduledDate.hour}:${scheduledDate.minute}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error scheduling evening Azkar notification: $e');
       }
     }
   }
@@ -236,6 +442,159 @@ class NotificationService {
         print('❌ Error loading duaa: $e');
       }
       return null;
+    }
+  }
+
+  // Get random Azkar from JSON by category
+  Future<String?> _getRandomAzkar(String category) async {
+    try {
+      // Load azkar.json
+      final jsonString = await rootBundle.loadString('assets/data/azkar.json');
+      final Map<String, dynamic> decoded = json.decode(jsonString);
+
+      // Get the specific category (morning or evening)
+      final categoryData = decoded[category];
+
+      if (categoryData == null) {
+        if (kDebugMode) {
+          print('⚠️ Category "$category" not found in azkar.json');
+        }
+        return null;
+      }
+
+      List<String> azkarList = [];
+
+      // Parse the azkar data structure
+      if (categoryData is List) {
+        for (var item in categoryData) {
+          if (item is List) {
+            // Nested array structure
+            for (var subItem in item) {
+              if (subItem is Map && subItem['zikr'] != null) {
+                azkarList.add(subItem['zikr'].toString());
+              }
+            }
+          } else if (item is Map && item['zikr'] != null) {
+            // Direct map structure
+            azkarList.add(item['zikr'].toString());
+          }
+        }
+      }
+
+      if (azkarList.isEmpty) {
+        if (kDebugMode) {
+          print('⚠️ No azkar found in category "$category"');
+        }
+        return 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ';
+      }
+
+      // Select random azkar
+      final random = Random();
+      final selectedAzkar = azkarList[random.nextInt(azkarList.length)];
+
+      return selectedAzkar;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error loading azkar: $e');
+      }
+      return null;
+    }
+  }
+
+  // Check and save notifications that should have been delivered today
+  Future<void> _checkAndSaveOverdueNotifications() async {
+    try {
+      final now = DateTime.now();
+      final currentHour = now.hour;
+
+      if (kDebugMode) {
+        print(
+            '🔍 Checking for overdue notifications... Current time: ${now.hour}:${now.minute}');
+      }
+
+      // Check morning azkar (9 AM)
+      if (currentHour >= 9) {
+        final azkar = await _getRandomAzkar('أذكار الصباح');
+        if (azkar != null && azkar.isNotEmpty) {
+          await _saveNotificationIfNotToday('morning_azkar', azkar);
+        }
+      }
+
+      // Check duaa (1 PM / 13:00)
+      if (currentHour >= 13) {
+        final duaa = await _getRandomDuaa();
+        if (duaa != null && duaa.isNotEmpty) {
+          await _saveNotificationIfNotToday('duaa', duaa);
+        }
+      }
+
+      // Check evening azkar (7 PM / 19:00)
+      if (currentHour >= 19) {
+        final azkar = await _getRandomAzkar('أذكار المساء');
+        if (azkar != null && azkar.isNotEmpty) {
+          await _saveNotificationIfNotToday('evening_azkar', azkar);
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error checking overdue notifications: $e');
+      }
+    }
+  }
+
+  // Save notification to history only if not already saved today
+  Future<void> _saveNotificationIfNotToday(String type, String content) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final today =
+          DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
+
+      // Determine the key and title based on type
+      String deliveryKey;
+      String title;
+
+      switch (type) {
+        case 'duaa':
+          deliveryKey = _lastDuaaDeliveryKey;
+          title = 'دعاء اليوم';
+          break;
+        case 'morning_azkar':
+          deliveryKey = _lastMorningAzkarDeliveryKey;
+          title = 'أذكار الصباح';
+          break;
+        case 'evening_azkar':
+          deliveryKey = _lastEveningAzkarDeliveryKey;
+          title = 'أذكار المساء';
+          break;
+        default:
+          if (kDebugMode) {
+            print('⚠️ Unknown notification type: $type');
+          }
+          return;
+      }
+
+      // Check if already saved today
+      final lastDeliveryDate = prefs.getString(deliveryKey);
+      if (lastDeliveryDate == today) {
+        if (kDebugMode) {
+          print('ℹ️ Notification "$type" already saved today, skipping...');
+        }
+        return;
+      }
+
+      // Save to history
+      await _saveNotification(title, content, type);
+
+      // Update last delivery date
+      await prefs.setString(deliveryKey, today);
+
+      if (kDebugMode) {
+        print('✅ Notification "$type" saved to history for date: $today');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error in _saveNotificationIfNotToday: $e');
+      }
     }
   }
 

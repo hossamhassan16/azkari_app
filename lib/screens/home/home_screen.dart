@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Initialize screens once
     _screens = [
       _buildHomeScreen(), // Index 0: Home
-      const NotificationsScreen(), // Index 1: Notifications ✅
+      const NotificationsScreen(), // Index 1: Notifications
       const QuranScreen(), // Index 2: Quran
       const AzkarScreen(), // Index 3: Azkar
       const MoreScreen(), // Index 4: More

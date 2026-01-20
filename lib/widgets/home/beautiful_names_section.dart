@@ -1,21 +1,45 @@
-import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
-import '../common/section_header.dart';
+import 'dart:ui';
 
-class BeautifulNamesSection extends StatelessWidget {
+import 'package:azkari_app/core/constants/app_colors.dart';
+import 'package:azkari_app/core/constants/app_strings.dart';
+import 'package:azkari_app/models/allah_names_model.dart';
+import 'package:azkari_app/services/allah_names_services.dart';
+import 'package:azkari_app/widgets/common/section_header.dart';
+import 'package:flutter/material.dart';
+
+class BeautifulNamesSection extends StatefulWidget {
   const BeautifulNamesSection({super.key});
 
   @override
+  State<BeautifulNamesSection> createState() => _BeautifulNamesSectionState();
+}
+
+class _BeautifulNamesSectionState extends State<BeautifulNamesSection> {
+  AllahNameModel? name;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadName();
+  }
+
+  Future<void> _loadName() async {
+    final result = await AllahNamesService().getDailyRandomName();
+    setState(() => name = result);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (name == null) {
+      return const SizedBox();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
           title: AppStrings.beautifulNames,
-          onShare: () {
-            // Handle share
-          },
+          onShare: () {},
         ),
         Container(
           width: double.infinity,
@@ -27,9 +51,9 @@ class BeautifulNamesSection extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Text(
-                'Name of Allah',
-                style: TextStyle(
+              Text(
+                name!.nameAr,
+                style: const TextStyle(
                   color: AppColors.white,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -37,9 +61,9 @@ class BeautifulNamesSection extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Description will be here',
-                style: TextStyle(
+              Text(
+                name!.meaningAr,
+                style: const TextStyle(
                   color: AppColors.white,
                   fontSize: 16,
                 ),
