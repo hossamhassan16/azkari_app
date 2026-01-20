@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../widgets/quran/quran_app_bar.dart';
 import '../../widgets/quran/tab_selector.dart';
-import '../../widgets/navigation/bottom_nav_bar.dart';
 import 'surah_list_view.dart';
 import 'juz_list_view.dart';
 import 'verse_search_view.dart';
@@ -74,14 +73,6 @@ class _QuranScreenState extends State<QuranScreen> {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 2,
-        onTap: (index) {
-          if (index != 2) {
-            Navigator.of(context).pop();
-          }
-        },
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'package:azkari_app/screens/more/feelings_screen.dart';
+import 'package:azkari_app/screens/rosary/electronic_rosary_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
@@ -53,20 +55,55 @@ class _ShortcutItem extends StatelessWidget {
     }
   }
 
+  void handleShortcutTap(BuildContext context) {
+    switch (index) {
+      case 0:
+        print('Pray With Me tapped');
+        break;
+      case 1:
+        print('Remembrance Circles tapped');
+        break;
+      case 2:
+        print('Electronic Rosary tapped');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ElectronicRosaryScreen(),
+          ),
+        );
+        break;
+      case 3:
+        print('How Do You Feel tapped');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const FeelingsScreen(),
+          ),
+        );
+        break;
+      case 4:
+        print('Read Khatmah tapped');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.primaryGreen,
-          ),
-          child: const Icon(
-            Icons.star,
-            color: AppColors.white,
+        GestureDetector(
+          onTap: () => handleShortcutTap(context),
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primaryGreen,
+            ),
+            child: const Icon(
+              Icons.star,
+              color: AppColors.white,
+            ),
           ),
         ),
         const SizedBox(height: 8),

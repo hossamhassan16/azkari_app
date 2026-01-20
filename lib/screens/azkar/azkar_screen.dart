@@ -3,7 +3,6 @@ import '../../core/constants/app_colors.dart';
 import '../../models/azkar_category_model.dart';
 import '../../services/azkar_service.dart';
 import '../../widgets/azkar/azkar_category_card.dart';
-import '../../widgets/navigation/bottom_nav_bar.dart';
 import 'azkar_detail_screen.dart';
 
 class AzkarScreen extends StatefulWidget {
@@ -153,14 +152,6 @@ class _AzkarScreenState extends State<AzkarScreen> {
         onPressed: _showAddCategoryDialog,
         backgroundColor: AppColors.primaryGreen,
         child: const Icon(Icons.add, color: AppColors.white, size: 32),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 3,
-        onTap: (index) {
-          if (index != 3) {
-            Navigator.of(context).pop();
-          }
-        },
       ),
     );
   }

@@ -17,7 +17,6 @@ import 'package:azkari_app/screens/quran/quran_screen.dart';
 import 'package:azkari_app/screens/rosary/electronic_rosary_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import '../../widgets/navigation/bottom_nav_bar.dart';
 import '../../widgets/more/more_item_button.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -324,14 +323,14 @@ class MoreScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 4, // More tab
-        onTap: (index) {
-          if (index != 4) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      // bottomNavigationBar: BottomNavBar(
+      //   currentIndex: 4, // More tab
+      //   onTap: (index) {
+      //     if (index != 4) {
+      //       Navigator.of(context).pop();
+      //     }
+      //   },
+      // ),
     );
   }
 }

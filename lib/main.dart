@@ -6,6 +6,7 @@ import 'services/azkar_service.dart';
 import 'services/quran_duas_service.dart';
 import 'services/tasbeh_service.dart';
 import 'services/story_service.dart';
+import 'services/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -20,6 +21,7 @@ void main() async {
   await QuranDuasService().init();
   await TasbehService().init();
   await StoryService().init();
+  await NotificationService().init();
 
   runApp(const MyApp());
 }

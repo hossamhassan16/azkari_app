@@ -45,30 +45,6 @@ class BeautifulNamesSection extends StatelessWidget {
                 ),
                 textAlign: TextAlign.right,
               ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Handle edit page
-                },
-                icon: const Icon(Icons.edit, color: AppColors.black),
-                label: const Text(
-                  AppStrings.editPage,
-                  style: TextStyle(
-                    color: AppColors.black,
-                    fontSize: 14,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

@@ -19,6 +19,7 @@ import '../../widgets/home/beautiful_names_section.dart';
 import '../quran/quran_screen.dart';
 import '../azkar/azkar_screen.dart';
 import '../more/more_screen.dart';
+import '../notifications/notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,36 +31,97 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentNavIndex = 0;
 
+  // ✅ List of screens for IndexedStack
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize screens once
+    _screens = [
+      _buildHomeScreen(), // Index 0: Home
+      const NotificationsScreen(), // Index 1: Notifications ✅
+      const QuranScreen(), // Index 2: Quran
+      const AzkarScreen(), // Index 3: Azkar
+      const MoreScreen(), // Index 4: More
+    ];
+  }
+
+  // Build home screen content
+  Widget _buildHomeScreen() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Basmala Section
+          const BasmalaSection(),
+
+          // Circular Cards Section
+          const CircularCardsSection(),
+
+          // Date Section
+          const DateSection(),
+
+          // Shortcuts Section
+          const ShortcutsSection(),
+
+          const SizedBox(height: 16),
+
+          // Encouragement Section
+          const EncouragementSection(),
+
+          // Ramadan Countdown Section
+          const RamadanCountdownSection(),
+
+          // Khatmah Section
+          const KhatmahSection(),
+
+          const SizedBox(height: 16),
+
+          // Habit Tracker Section
+          const HabitTrackerSection(),
+
+          const SizedBox(height: 16),
+
+          // Verse of the Day Section
+          const VerseOfDaySection(),
+
+          const SizedBox(height: 16),
+
+          // Hadith of the Day Section
+          const HadithOfDaySection(),
+
+          const SizedBox(height: 16),
+
+          // Question of the Day Section
+          const QuestionOfDaySection(),
+
+          const SizedBox(height: 16),
+
+          // Prayer of the Day Section
+          const PrayerOfDaySection(),
+
+          const SizedBox(height: 16),
+
+          // Beautiful Names Section
+          const BeautifulNamesSection(),
+
+          const SizedBox(height: 16),
+
+          // Ad Banner
+          const AdBanner(),
+
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Simple navigation - just update index
   void _onNavTap(int index) {
-    if (index == 2) {
-      // Navigate to Quran screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const QuranScreen(),
-        ),
-      );
-    } else if (index == 3) {
-      // Navigate to Azkar screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AzkarScreen(),
-        ),
-      );
-    } else if (index == 4) {
-      // Navigate to More screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MoreScreen(),
-        ),
-      );
-    } else {
-      setState(() {
-        _currentNavIndex = index;
-      });
-    }
+    setState(() {
+      _currentNavIndex = index;
+    });
   }
 
   @override
@@ -69,76 +131,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Custom App Bar
-            const CustomAppBar(),
+            // Custom App Bar (only show on Home screen)
+            if (_currentNavIndex == 0) const CustomAppBar(),
 
-            // Scrollable Content
+            // ✅ IndexedStack: Shows selected screen, keeps others in memory
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Basmala Section
-                    const BasmalaSection(),
-
-                    // Circular Cards Section
-                    const CircularCardsSection(),
-
-                    // Date Section
-                    const DateSection(),
-
-                    // Shortcuts Section
-                    const ShortcutsSection(),
-
-                    const SizedBox(height: 16),
-
-                    // Encouragement Section
-                    const EncouragementSection(),
-
-                    // Ramadan Countdown Section
-                    const RamadanCountdownSection(),
-
-                    // Khatmah Section
-                    const KhatmahSection(),
-
-                    const SizedBox(height: 16),
-
-                    // Habit Tracker Section
-                    const HabitTrackerSection(),
-
-                    const SizedBox(height: 16),
-
-                    // Verse of the Day Section
-                    const VerseOfDaySection(),
-
-                    const SizedBox(height: 16),
-
-                    // Hadith of the Day Section
-                    const HadithOfDaySection(),
-
-                    const SizedBox(height: 16),
-
-                    // Question of the Day Section
-                    const QuestionOfDaySection(),
-
-                    const SizedBox(height: 16),
-
-                    // Prayer of the Day Section
-                    const PrayerOfDaySection(),
-
-                    const SizedBox(height: 16),
-
-                    // Beautiful Names Section
-                    const BeautifulNamesSection(),
-
-                    const SizedBox(height: 16),
-
-                    // Ad Banner
-                    const AdBanner(),
-
-                    const SizedBox(height: 16),
-                  ],
-                ),
+              child: IndexedStack(
+                index: _currentNavIndex,
+                children: _screens,
               ),
             ),
           ],

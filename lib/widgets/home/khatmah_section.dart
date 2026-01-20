@@ -1,3 +1,4 @@
+import 'package:azkari_app/screens/quran/QuranScreen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
@@ -39,7 +40,12 @@ class KhatmahSection extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Handle start khatmah
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const QuranScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen,
@@ -65,4 +71,3 @@ class KhatmahSection extends StatelessWidget {
     );
   }
 }
-
