@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/azkar_category_model.dart';
-import '../../models/zikr_model.dart';
 import '../../services/azkar_service.dart';
-import '../../widgets/azkar/duaa_card.dart';
-import '../../models/duaa_item_model.dart';
-import 'add_zikr_dialog.dart';
+import '../../cubits/azkar/azkar_detail_cubit.dart';
+import '../../cubits/azkar/settings_cubit.dart';
+import '../../widgets/azkar/azkar_settings_dialog.dart';
+import 'widgets/azkar_exit_dialog.dart';
+import 'widgets/azkar_zikr_dialogs.dart';
+import 'widgets/azkar_duaa_card_builder.dart';
 
-class AzkarDetailScreen extends StatefulWidget {
+class AzkarDetailScreen extends StatelessWidget {
   final AzkarCategoryModel category;
 
   const AzkarDetailScreen({
@@ -18,480 +20,86 @@ class AzkarDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<AzkarDetailScreen> createState() => _AzkarDetailScreenState();
+  Widget build(BuildContext context) {
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            backgroundColor: AppColors.darkBackground,
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+      ),
+    );
+  }
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => AzkarDetailCubit(AzkarService()),
+            ),
+            BlocProvider(
+              create: (context) => SettingsCubit(snapshot.data!),
+            ),
+          ],
+          child: AzkarDetailScreenView(category: category),
+        );
+      },
+    );
+  }
 }
 
-class _AzkarDetailScreenState extends State<AzkarDetailScreen> {
-  final AzkarService _azkarService = AzkarService();
-  bool _isEditMode = false;
-  bool _isHorizontal = false;
-  double _fontSize = 24.0;
-  bool _vibrateAtZero = true;
-  bool _hideAtZero = false;
-  bool _tapOnCardToCount = false;
-  bool _confirmExit = false;
-  SharedPreferences? _prefs;
+class AzkarDetailScreenView extends StatelessWidget {
+  final AzkarCategoryModel category;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isHorizontal = _prefs?.getBool('azkar_is_horizontal') ?? false;
-      _fontSize = _prefs?.getDouble('azkar_font_size') ?? 24.0;
-      _vibrateAtZero = _prefs?.getBool('azkar_vibrate_at_zero') ?? true;
-      _hideAtZero = _prefs?.getBool('azkar_hide_at_zero') ?? false;
-      _tapOnCardToCount = _prefs?.getBool('azkar_tap_on_card') ?? false;
-      _confirmExit = _prefs?.getBool('azkar_confirm_exit') ?? false;
-    });
-  }
-
-  Future<void> _saveSettings() async {
-    await _prefs?.setBool('azkar_is_horizontal', _isHorizontal);
-    await _prefs?.setDouble('azkar_font_size', _fontSize);
-    await _prefs?.setBool('azkar_vibrate_at_zero', _vibrateAtZero);
-    await _prefs?.setBool('azkar_hide_at_zero', _hideAtZero);
-    await _prefs?.setBool('azkar_tap_on_card', _tapOnCardToCount);
-    await _prefs?.setBool('azkar_confirm_exit', _confirmExit);
-  }
-
-  void _toggleEditMode() {
-    setState(() {
-      _isEditMode = !_isEditMode;
-    });
-  }
-
-  void _saveAndExitEditMode() {
-    setState(() {
-      _isEditMode = false;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم حفظ التعديلات'),
-        backgroundColor: AppColors.primaryGreen,
-      ),
-    );
-  }
-
-  void _showSettingsDialog() {
-    // Create local state variables for the dialog
-    double tempFontSize = _fontSize;
-    bool tempIsHorizontal = _isHorizontal;
-    bool tempVibrateAtZero = _vibrateAtZero;
-    bool tempHideAtZero = _hideAtZero;
-    bool tempTapOnCard = _tapOnCardToCount;
-    bool tempConfirmExit = _confirmExit;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // خيارات العرض
-                  const Text(
-                    'خيارات العرض',
-                    style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildDisplayOption(
-                        'عامودي',
-                        !tempIsHorizontal,
-                        () {
-                          setDialogState(() {
-                            tempIsHorizontal = false;
-                          });
-                        },
-                      ),
-                      _buildDisplayOption(
-                        'أفقي',
-                        tempIsHorizontal,
-                        () {
-                          setDialogState(() {
-                            tempIsHorizontal = true;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // خيارات الخط
-                  const Text(
-                    'خيارات الخط',
-                    style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'حجم الخط',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Text(
-                            '12',
-                            style: TextStyle(color: AppColors.greyText),
-                          ),
-                          Expanded(
-                            child: SliderTheme(
-                              data: SliderThemeData(
-                                activeTrackColor: AppColors.primaryGreen,
-                                inactiveTrackColor: AppColors.greyText.withOpacity(0.3),
-                                thumbColor: AppColors.primaryGreen,
-                                overlayColor: AppColors.primaryGreen.withOpacity(0.3),
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                trackHeight: 4,
-                              ),
-                              child: Slider(
-                                value: tempFontSize,
-                                min: 12,
-                                max: 60,
-                                divisions: 48,
-                                onChanged: (value) {
-                                  setDialogState(() {
-                                    tempFontSize = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          const Text(
-                            '60',
-                            style: TextStyle(color: AppColors.greyText),
-                          ),
-                        ],
-                      ),
-                      Center(
-                        child: Text(
-                          '${tempFontSize.round()}',
-                          style: const TextStyle(
-                            color: AppColors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ارتجاع عند الصفر
-                  _buildCheckboxOption(
-                    'ارتجاع عند الصفر',
-                    'تفعيل هذا الخيار سيفعل الارتجاج عند وصول العداد للصفر في صفحة أذكار اليوم والليلة',
-                    tempVibrateAtZero,
-                    (value) {
-                      setDialogState(() {
-                        tempVibrateAtZero = value ?? true;
-                      });
-                    },
-                  ),
-
-                  // اخفاء عند الصفر
-                  _buildCheckboxOption(
-                    'اخفاء عند الصفر',
-                    'بتفعيل هذا الخيار سيختفي الذكر عند وصول العداد للصفر في صفحة أذكار اليوم والليلة',
-                    tempHideAtZero,
-                    (value) {
-                      setDialogState(() {
-                        tempHideAtZero = value ?? false;
-                      });
-                    },
-                  ),
-
-                  // العد بالضغط على الذكر
-                  _buildCheckboxOption(
-                    'العد بالضغط على الذكر',
-                    'بتفعيل هذا الخيار يمكنك الضغط على اي مكان على الذكر للعد',
-                    tempTapOnCard,
-                    (value) {
-                      setDialogState(() {
-                        tempTapOnCard = value ?? false;
-                      });
-                    },
-                  ),
-
-                  // تأكيد الخروج
-                  _buildCheckboxOption(
-                    'تأكيد الخروج',
-                    'تفعيل هذا الخيار سيمنع الخروج بالخطأ من اذكار اليوم و الليلة اثناء قراءتها في حال لم تنهي كل الأذكار و سيسألك قبل الخروج',
-                    tempConfirmExit,
-                    (value) {
-                      setDialogState(() {
-                        tempConfirmExit = value ?? false;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Save button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _fontSize = tempFontSize;
-                          _isHorizontal = tempIsHorizontal;
-                          _vibrateAtZero = tempVibrateAtZero;
-                          _hideAtZero = tempHideAtZero;
-                          _tapOnCardToCount = tempTapOnCard;
-                          _confirmExit = tempConfirmExit;
-                        });
-                        _saveSettings();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGreen,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        'حفظ',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildDisplayOption(String label, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.white, fontSize: 16),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? AppColors.primaryGreen : AppColors.greyText,
-                width: 2,
-              ),
-            ),
-            child: isSelected
-                ? Center(
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCheckboxOption(
-    String title,
-    String description,
-    bool value,
-    Function(bool?) onChanged,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: value,
-                onChanged: onChanged,
-                activeColor: AppColors.primaryGreen,
-              ),
-              Expanded(
-                child: Text(
-                  description,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: AppColors.greyText,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddZikrDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AddZikrDialog(
-        categoryName: widget.category.name,
-        onAdd: (zikr) async {
-          await _azkarService.addCustomZikr(widget.category.name, zikr);
-          setState(() {});
-        },
-      ),
-    );
-  }
-
-  void _showEditZikrDialog(ZikrModel zikr) {
-    showDialog(
-      context: context,
-      builder: (context) => AddZikrDialog(
-        categoryName: widget.category.name,
-        existingZikr: zikr,
-        onAdd: (updatedZikr) async {
-          await _azkarService.updateZikr(widget.category.name, updatedZikr);
-          setState(() {});
-        },
-        onDelete: () async {
-          await _azkarService.deleteZikr(widget.category.name, zikr.id);
-          setState(() {});
-        },
-      ),
-    );
-  }
-
-  Future<bool> _onWillPop() async {
-    if (!_confirmExit) {
-      return true;
-    }
-
-    // Check if any azkar are incomplete
-    final hasIncomplete = widget.category.azkar.any((z) => z.currentCount > 0);
-    if (!hasIncomplete) {
-      return true;
-    }
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.cardBackground,
-        title: const Text(
-          'تأكيد الخروج',
-          style: TextStyle(color: AppColors.white),
-          textAlign: TextAlign.right,
-        ),
-        content: const Text(
-          'لم تنهي جميع الأذكار، هل تريد الخروج؟',
-          style: TextStyle(color: AppColors.white),
-          textAlign: TextAlign.right,
-          textDirection: TextDirection.rtl,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'إلغاء',
-              style: TextStyle(color: AppColors.greyText),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'خروج',
-              style: TextStyle(color: AppColors.primaryGreen),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    return result ?? false;
-  }
+  const AzkarDetailScreenView({
+    super.key,
+    required this.category,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Filter out completed azkar if hideAtZero is enabled
-    final visibleAzkar = _hideAtZero
-        ? widget.category.azkar.where((z) => z.currentCount > 0).toList()
-        : widget.category.azkar;
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, settingsState) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (!didPop) {
+              final canPop = await _handleWillPop(context, settingsState);
+              if (canPop && context.mounted) {
+                Navigator.of(context).pop();
+              }
+            }
+          },
+          child: Scaffold(
+            backgroundColor: AppColors.darkBackground,
+            appBar: _buildAppBar(context),
+            body: _buildBody(context, settingsState),
+            floatingActionButton: _buildFloatingActionButton(context),
+          ),
+        );
+      },
+    );
+  }
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        backgroundColor: AppColors.darkBackground,
-        appBar: AppBar(
+  /// Get visible azkar based on hideAtZero setting
+  List<dynamic> _getVisibleAzkar(SettingsState settings) {
+    return settings.hideAtZero
+        ? category.azkar.where((z) => z.currentCount > 0).toList()
+        : category.azkar;
+  }
+
+  /// Build the app bar
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
           backgroundColor: AppColors.cardBackground,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: AppColors.white),
-            onPressed: () async {
-              final canPop = await _onWillPop();
-              if (canPop && mounted) {
-                Navigator.of(context).pop();
-              }
-            },
+        onPressed: () => _handleBackButton(context),
           ),
           title: Text(
-            widget.category.name,
+        category.name,
             style: const TextStyle(
               color: AppColors.white,
               fontSize: 20,
@@ -499,111 +107,182 @@ class _AzkarDetailScreenState extends State<AzkarDetailScreen> {
             ),
           ),
           actions: [
-            IconButton(
+        _buildEditButton(context),
+        _buildSettingsButton(context),
+      ],
+    );
+  }
+
+  /// Build edit/check button
+  Widget _buildEditButton(BuildContext context) {
+    return BlocBuilder<AzkarDetailCubit, AzkarDetailState>(
+      builder: (context, detailState) {
+        final isEditMode = context.read<AzkarDetailCubit>().isEditMode;
+        return IconButton(
               icon: Icon(
-                _isEditMode ? Icons.check : Icons.edit,
+            isEditMode ? Icons.check : Icons.edit,
                 color: AppColors.white,
               ),
-              onPressed: _isEditMode ? _saveAndExitEditMode : _toggleEditMode,
-            ),
-            IconButton(
+          onPressed: () => _handleEditButtonPress(context, isEditMode),
+        );
+      },
+    );
+  }
+
+  /// Build settings button
+  Widget _buildSettingsButton(BuildContext context) {
+    return IconButton(
               icon: const Icon(Icons.settings, color: AppColors.white),
-              onPressed: _showSettingsDialog,
-            ),
-          ],
-        ),
-        body: visibleAzkar.isEmpty
-            ? const Center(
+      onPressed: () => _showSettingsDialog(context),
+    );
+  }
+
+  /// Build main body content
+  Widget _buildBody(
+    BuildContext context,
+    SettingsState settingsState,
+  ) {
+    return BlocConsumer<AzkarDetailCubit, AzkarDetailState>(
+      listener: (context, state) => _handleDetailStateChanges(context, state),
+      builder: (context, detailState) {
+        // Recalculate visible azkar on every rebuild
+        final visibleAzkar = _getVisibleAzkar(settingsState);
+        
+        if (visibleAzkar.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return settingsState.isHorizontal
+            ? _buildHorizontalView(visibleAzkar)
+            : _buildVerticalView(visibleAzkar);
+      },
+    );
+  }
+
+  /// Build empty state widget
+  Widget _buildEmptyState() {
+    return const Center(
                 child: Text(
                   'لا توجد أذكار',
                   style: TextStyle(color: AppColors.white, fontSize: 18),
                 ),
-              )
-            : _isHorizontal
-                ? PageView.builder(
+    );
+  }
+
+  /// Build horizontal (PageView) layout
+  Widget _buildHorizontalView(List<dynamic> visibleAzkar) {
+    return PageView.builder(
                     itemCount: visibleAzkar.length,
                     itemBuilder: (context, index) {
-                      final zikrIndex = widget.category.azkar.indexOf(visibleAzkar[index]);
                       return Center(
                         child: SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: _buildDuaaCard(zikrIndex),
+              child: AzkarDuaaCardBuilder(
+                category: category,
+                zikr: visibleAzkar[index],
+              ),
                           ),
                         ),
                       );
                     },
-                  )
-                : ListView.builder(
+    );
+  }
+
+  /// Build vertical (ListView) layout
+  Widget _buildVerticalView(List<dynamic> visibleAzkar) {
+    return ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: visibleAzkar.length,
                     itemBuilder: (context, index) {
-                      final zikrIndex = widget.category.azkar.indexOf(visibleAzkar[index]);
-                      return _buildDuaaCard(zikrIndex);
-                    },
-                  ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showAddZikrDialog,
+        return AzkarDuaaCardBuilder(
+          category: category,
+          zikr: visibleAzkar[index],
+        );
+      },
+    );
+  }
+
+  /// Build floating action button
+  Widget _buildFloatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () => _showAddZikrDialog(context),
           backgroundColor: AppColors.primaryGreen,
           child: const Icon(Icons.add, color: AppColors.white, size: 32),
+    );
+  }
+
+  // ============= Event Handlers =============
+
+  /// Handle back button press
+  Future<void> _handleBackButton(BuildContext context) async {
+    final settingsState = context.read<SettingsCubit>().state;
+    final canPop = await _handleWillPop(context, settingsState);
+    if (canPop && context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  /// Handle will pop (exit confirmation)
+  Future<bool> _handleWillPop(
+    BuildContext context,
+    SettingsState settings,
+  ) async {
+    return await AzkarExitDialog.show(
+      context: context,
+      confirmExit: settings.confirmExit,
+      category: category,
+    );
+  }
+
+  /// Handle edit button press
+  void _handleEditButtonPress(BuildContext context, bool isEditMode) {
+    if (isEditMode) {
+      context.read<AzkarDetailCubit>().saveAndExitEditMode();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم حفظ التعديلات'),
+          backgroundColor: AppColors.primaryGreen,
         ),
+      );
+    } else {
+      context.read<AzkarDetailCubit>().toggleEditMode();
+    }
+  }
+
+  /// Handle detail state changes (errors, success)
+  void _handleDetailStateChanges(BuildContext context, AzkarDetailState state) {
+    if (state is AzkarDetailError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.message)),
+      );
+    } else if (state is AzkarDetailZikrAdded ||
+        state is AzkarDetailZikrUpdated ||
+        state is AzkarDetailZikrDeleted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  // ============= Dialog Helpers =============
+
+  /// Show settings dialog
+  void _showSettingsDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<SettingsCubit>(),
+        child: const AzkarSettingsDialog(),
       ),
     );
   }
 
-  Widget _buildDuaaCard(int index) {
-    final zikr = widget.category.azkar[index];
-    final duaItem = DuaItemModel(
-      id: zikr.id,
-      content: zikr.content,
-      reference: zikr.description,
-      count: zikr.initialCount,
-      currentCount: zikr.currentCount,
-    );
-
-    return GestureDetector(
-      onTap: _tapOnCardToCount && !_isEditMode
-          ? () async {
-              if (zikr.currentCount > 0) {
-                final newCount = zikr.currentCount - 1;
-                await _azkarService.saveProgress(
-                  widget.category.name,
-                  zikr.id,
-                  newCount,
-                );
-                
-                // Vibrate at zero if enabled
-                if (newCount == 0 && _vibrateAtZero) {
-                  HapticFeedback.heavyImpact();
-                }
-                
-                setState(() {});
-              }
-            }
-          : null,
-      child: DuaCard(
-        dua: duaItem,
-        isHorizontal: _isHorizontal,
-        fontSize: _fontSize,
-        onCounterTap: () async {
-          if (zikr.currentCount > 0) {
-            final newCount = zikr.currentCount - 1;
-            await _azkarService.saveProgress(
-              widget.category.name,
-              zikr.id,
-              newCount,
-            );
-            
-            // Vibrate at zero if enabled
-            if (newCount == 0 && _vibrateAtZero) {
-              HapticFeedback.heavyImpact();
-            }
-            
-            setState(() {});
-          }
-        },
-        onEdit: _isEditMode ? () => _showEditZikrDialog(zikr) : null,
-      ),
+  /// Show add zikr dialog
+  void _showAddZikrDialog(BuildContext context) {
+    AzkarZikrDialogs.showAddZikrDialog(
+      context: context,
+      categoryName: category.name,
     );
   }
 }
