@@ -1,4 +1,4 @@
-import 'package:azkari_app/screens/quran/QuranScreen.dart';
+import 'package:azkari_app/screens/quran/quran_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';

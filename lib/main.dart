@@ -7,11 +7,9 @@ import 'services/quran_duas_service.dart';
 import 'services/tasbeh_service.dart';
 import 'services/story_service.dart';
 import 'services/notification_service.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
-  Intl.defaultLocale = 'ar';
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ar');
 
@@ -41,7 +39,6 @@ class MyApp extends StatelessWidget {
           primary: AppColors.primaryGreen,
           secondary: AppColors.primaryYellow,
           surface: AppColors.cardBackground,
-          background: AppColors.darkBackground,
         ),
       ),
       debugShowCheckedModeBanner: false,
