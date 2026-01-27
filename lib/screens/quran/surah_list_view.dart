@@ -1,3 +1,4 @@
+import 'package:azkari_app/services/audio_service.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/surah_model.dart';
@@ -45,7 +46,7 @@ class SurahListViewState extends State<SurahListView> {
 
   void searchSurahs(String query) async {
     if (!mounted) return;
-    
+
     if (query.trim().isEmpty) {
       setState(() {
         _filteredSurahs = _allSurahs;
@@ -126,6 +127,10 @@ class SurahListViewState extends State<SurahListView> {
           return SurahCard(
             surah: _filteredSurahs[index],
             onTap: () {
+              // 1. حفظ رقم السورة المختارة في خدمة الصوت
+              AudioService().selectSurah(_filteredSurahs[index].number);
+
+              // 2. الانتقال لصفحة التفاصيل كما كنت تفعل
               Navigator.push(
                 context,
                 MaterialPageRoute(

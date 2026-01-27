@@ -1,3 +1,4 @@
+import 'package:azkari_app/services/audio_service.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/quran_settings_service.dart';
@@ -230,40 +231,41 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
                       width: 1,
                     ),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<QuranReaderModel>(
-                      value: _selectedReader,
-                      isExpanded: true,
-                      dropdownColor: AppColors.cardBackground,
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: AppColors.primaryGreen,
-                      ),
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 16,
-                      ),
-                      items: _settingsService.readers.map((reader) {
-                        return DropdownMenuItem<QuranReaderModel>(
-                          value: reader,
-                          child: Text(
-                            reader.name,
-                            style: const TextStyle(
-                              color: AppColors.white,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (QuranReaderModel? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedReader = newValue;
-                            _applySettings();
-                          });
-                        }
-                      },
-                    ),
-                  ),
+                  child: _settingsService.readers.isEmpty
+                      ? const Center(
+                          child:
+                              CircularProgressIndicator()) // انتظر تحميل البيانات
+                      : DropdownButtonHideUnderline(
+                          child: DropdownButton<QuranReaderModel>(
+                              value: _selectedReader,
+                              isExpanded: true,
+                              dropdownColor: AppColors.cardBackground,
+                              items: _settingsService.readers.map((reader) {
+                                return DropdownMenuItem<QuranReaderModel>(
+                                  value: reader,
+                                  child: Text(reader.name,
+                                      style: const TextStyle(
+                                          color: AppColors.white)),
+                                );
+                              }).toList(),
+                              onChanged: (QuranReaderModel? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    _selectedReader = newValue;
+                                  });
+                                  // حفظ القارئ في الخدمة
+                                  _settingsService.setSelectedReader(newValue);
+
+                                  // التشغيل الفوري!
+                                  AudioService().playCurrentSurah();
+
+                                  // إغلاق الـ Bottom Sheet بعد الاختيار (اختياري)
+                                  // Navigator.pop(context);
+
+                                  widget.onSettingsChanged();
+                                }
+                              }),
+                        ),
                 ),
               ],
             ),

@@ -1,3 +1,4 @@
+import 'package:azkari_app/services/readers_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quran_reader_model.dart';
 
@@ -17,60 +18,8 @@ class QuranSettingsService {
   QuranReaderModel? _selectedReader;
   bool _readVerseOnLaunch = false;
 
-  // Cached list of readers to ensure consistent object references
-  final List<QuranReaderModel> _readers = [
-    QuranReaderModel(
-      id: 'ar.abdulbasetmratal',
-      name: 'عبد الباسط عبد الصمد المرتل',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.abdullahbesfer',
-      name: 'عبد الله بصفر',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.abdulrahmanalsudais',
-      name: 'عبدالرحمن السديس',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.abdulbasetabdulsamad',
-      name: 'عبدالباسط عبدالصمد',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.aboubakralshatri',
-      name: 'أبو بكر الشاطري',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.ahmedajamy',
-      name: 'أحمد بن علي العجمي',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.alafasy',
-      name: 'مشاري العفاسي',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.hanirifai',
-      name: 'هاني الرفاعي',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.husary',
-      name: 'محمود خليل الحصري',
-      language: 'ar',
-    ),
-    QuranReaderModel(
-      id: 'ar.husarymujawwad',
-      name: 'محمود خليل الحصري (المجود)',
-      language: 'ar',
-    ),
-  ];
-
+  // القائمة أصبحت ديناميكية الآن
+  List<QuranReaderModel> _readers = [];
   List<QuranReaderModel> get readers => _readers;
 
   VerseDisplayMode get displayMode => _displayMode;
@@ -80,7 +29,22 @@ class QuranSettingsService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+
+    // 1. جلب القراء من الـ API أولاً قبل تحميل الإعدادات
+    await loadReadersFromApi();
+
+    // 2. تحميل الإعدادات المحفوظة وربطها بالقراء الذين تم جلبهم
     _loadSettings();
+  }
+
+  Future<void> loadReadersFromApi() async {
+    try {
+      final apiService = ReadersService();
+      _readers = await apiService.fetchReciters();
+    } catch (e) {
+      print("Error loading readers: $e");
+      // يمكنك إضافة قراء افتراضيين هنا في حال فشل الاتصال
+    }
   }
 
   void _loadSettings() {
@@ -89,11 +53,19 @@ class QuranSettingsService {
     _fontSize = _prefs?.getDouble('fontSize') ?? 24.0;
     _readVerseOnLaunch = _prefs?.getBool('readVerseOnLaunch') ?? false;
 
-    final readerId = _prefs?.getString('selectedReader');
-    if (readerId != null) {
-      _selectedReader = _readers.firstWhere((r) => r.id == readerId,
-          orElse: () => _readers[0]);
-    } else {
+    // جلب الـ ID المحفوظ (كـ int لأن الـ API تستخدم أرقام)
+    final readerId = _prefs?.getInt('selectedReader');
+
+    if (readerId != null && _readers.isNotEmpty) {
+      try {
+        _selectedReader = _readers.firstWhere(
+          (r) => r.id == readerId,
+          orElse: () => _readers[0],
+        );
+      } catch (e) {
+        _selectedReader = _readers.isNotEmpty ? _readers[0] : null;
+      }
+    } else if (_readers.isNotEmpty) {
       _selectedReader = _readers[0];
     }
   }
@@ -110,7 +82,8 @@ class QuranSettingsService {
 
   Future<void> setSelectedReader(QuranReaderModel reader) async {
     _selectedReader = reader;
-    await _prefs?.setString('selectedReader', reader.id);
+    // حفظ الـ ID كـ int
+    await _prefs?.setInt('selectedReader', reader.id);
   }
 
   Future<void> setReadVerseOnLaunch(bool value) async {
