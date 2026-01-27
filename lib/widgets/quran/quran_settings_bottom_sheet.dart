@@ -12,7 +12,8 @@ class QuranSettingsBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<QuranSettingsBottomSheet> createState() => _QuranSettingsBottomSheetState();
+  State<QuranSettingsBottomSheet> createState() =>
+      _QuranSettingsBottomSheetState();
 }
 
 class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
@@ -27,7 +28,8 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
     super.initState();
     _selectedDisplayMode = _settingsService.displayMode;
     _fontSize = _settingsService.fontSize;
-    _selectedReader = _settingsService.selectedReader ?? _settingsService.readers[0];
+    _selectedReader =
+        _settingsService.selectedReader ?? _settingsService.readers[0];
     _readVerseOnLaunch = _settingsService.readVerseOnLaunch;
   }
 
@@ -85,7 +87,8 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
                       child: _DisplayModeButton(
                         icon: Icons.view_module_rounded,
                         label: 'صفحة',
-                        isSelected: _selectedDisplayMode == VerseDisplayMode.page,
+                        isSelected:
+                            _selectedDisplayMode == VerseDisplayMode.page,
                         onTap: () {
                           setState(() {
                             _selectedDisplayMode = VerseDisplayMode.page;
@@ -99,7 +102,8 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
                       child: _DisplayModeButton(
                         icon: Icons.view_list_rounded,
                         label: 'قائمة',
-                        isSelected: _selectedDisplayMode == VerseDisplayMode.list,
+                        isSelected:
+                            _selectedDisplayMode == VerseDisplayMode.list,
                         onTap: () {
                           setState(() {
                             _selectedDisplayMode = VerseDisplayMode.list;
@@ -216,7 +220,8 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(8),
@@ -354,7 +359,9 @@ class _DisplayModeButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryGreen.withOpacity(0.1) : AppColors.cardBackground,
+          color: isSelected
+              ? AppColors.primaryGreen.withOpacity(0.1)
+              : AppColors.cardBackground,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.primaryGreen : Colors.transparent,
@@ -368,11 +375,15 @@ class _DisplayModeButton extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryGreen : AppColors.greyText.withOpacity(0.3),
+                color: isSelected
+                    ? AppColors.primaryGreen
+                    : AppColors.greyText.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
                 color: AppColors.white,
                 size: 18,
               ),
@@ -398,5 +409,3 @@ class _DisplayModeButton extends StatelessWidget {
     );
   }
 }
-
-
