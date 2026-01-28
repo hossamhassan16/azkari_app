@@ -98,6 +98,7 @@ class VerseSearchViewState extends State<VerseSearchView> {
                       itemBuilder: (context, index) {
                         final ayah = _searchResults[index];
                         return AyahItem(
+                          isActive: false,
                           ayah: ayah,
                           fontSize: _settingsService.fontSize,
                           onBookmarkTap: () {

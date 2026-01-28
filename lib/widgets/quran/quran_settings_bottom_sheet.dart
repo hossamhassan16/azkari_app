@@ -24,13 +24,42 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
   late QuranReaderModel _selectedReader;
   late bool _readVerseOnLaunch;
 
+  // --- القائمة المسموح بها من المعرفات ---
+  final List<int> allowedReaderIds = [
+    1,
+    5,
+    9,
+    10,
+    31,
+    32,
+    51,
+    53,
+    60,
+    62,
+    67,
+    74,
+    77,
+    78,
+    106,
+    112,
+    118,
+    159,
+    256
+  ]; // يمكنك تغيير الأرقام هنا
+
   @override
   void initState() {
     super.initState();
     _selectedDisplayMode = _settingsService.displayMode;
     _fontSize = _settingsService.fontSize;
-    _selectedReader =
-        _settingsService.selectedReader ?? _settingsService.readers[0];
+
+    // تصفية القائمة للتأكد من اختيار قارئ متاح
+    final filtered = _settingsService.readers
+        .where((r) => allowedReaderIds.contains(r.id))
+        .toList();
+
+    _selectedReader = _settingsService.selectedReader ??
+        (filtered.isNotEmpty ? filtered[0] : _settingsService.readers[0]);
     _readVerseOnLaunch = _settingsService.readVerseOnLaunch;
   }
 
@@ -44,6 +73,11 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // تصفية قائمة القراء بناءً على الـ IDs المحددة
+    final filteredReaders = _settingsService.readers.where((reader) {
+      return allowedReaderIds.contains(reader.id);
+    }).toList();
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.darkBackground,
@@ -237,10 +271,16 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
                               CircularProgressIndicator()) // انتظر تحميل البيانات
                       : DropdownButtonHideUnderline(
                           child: DropdownButton<QuranReaderModel>(
-                              value: _selectedReader,
+                              // نتحقق من وجود القيمة داخل القائمة المفلترة
+                              value: filteredReaders
+                                      .any((r) => r.id == _selectedReader.id)
+                                  ? _selectedReader
+                                  : (filteredReaders.isNotEmpty
+                                      ? filteredReaders[0]
+                                      : null),
                               isExpanded: true,
                               dropdownColor: AppColors.cardBackground,
-                              items: _settingsService.readers.map((reader) {
+                              items: filteredReaders.map((reader) {
                                 return DropdownMenuItem<QuranReaderModel>(
                                   value: reader,
                                   child: Text(reader.name,
@@ -258,9 +298,6 @@ class _QuranSettingsBottomSheetState extends State<QuranSettingsBottomSheet> {
 
                                   // التشغيل الفوري!
                                   AudioService().playCurrentSurah();
-
-                                  // إغلاق الـ Bottom Sheet بعد الاختيار (اختياري)
-                                  // Navigator.pop(context);
 
                                   widget.onSettingsChanged();
                                 }

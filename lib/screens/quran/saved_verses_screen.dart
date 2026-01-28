@@ -68,6 +68,7 @@ class _SavedVersesScreenState extends State<SavedVersesScreen> {
               itemBuilder: (context, index) {
                 final ayah = savedVerses[index];
                 return AyahItem(
+                  isActive: false,
                   ayah: ayah,
                   fontSize: _settingsService.fontSize,
                   onBookmarkTap: () {

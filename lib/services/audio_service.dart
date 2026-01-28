@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../services/quran_settings_service.dart';
 
 class AudioService {
@@ -13,13 +15,51 @@ class AudioService {
 
   int? currentSurahNumber;
 
-  // ValueNotifier لضمان تحديث واجهة المستخدم تلقائيًا
   final ValueNotifier<Duration> positionNotifier = ValueNotifier(Duration.zero);
   final ValueNotifier<Duration> durationNotifier = ValueNotifier(Duration.zero);
+
+  final ValueNotifier<int> currentAyahIndexNotifier = ValueNotifier(-1);
+
+  List<Duration> ayahStartTimes = [];
+
   Stream<PlayerState> get playerStateStream => _player.onPlayerStateChanged;
 
   void selectSurah(int number) {
     currentSurahNumber = number;
+  }
+
+  Future<void> _loadAyahTimings() async {
+    if (currentSurahNumber == null) return;
+    final reader = _settings.selectedReader;
+    if (reader == null) return;
+
+    final url =
+        'https://www.mp3quran.net/api/v3/ayat_timing?surah=$currentSurahNumber&read=${reader.id}';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) return;
+
+    final List data = jsonDecode(response.body); // هنا List بدل Map
+
+    ayahStartTimes = data.map<Duration>((ayahData) {
+      final int startMs = ayahData['start_time'] is int
+          ? ayahData['start_time']
+          : int.tryParse(ayahData['start_time'].toString()) ?? 0;
+      return Duration(milliseconds: startMs);
+    }).toList()
+      ..sort((a, b) => a.inMilliseconds.compareTo(b.inMilliseconds));
+  }
+
+  void _updateCurrentAyah(Duration position) {
+    for (int i = 0; i < ayahStartTimes.length; i++) {
+      if (position < ayahStartTimes[i]) {
+        currentAyahIndexNotifier.value = i - 1;
+        return;
+      }
+    }
+    if (ayahStartTimes.isNotEmpty) {
+      currentAyahIndexNotifier.value = ayahStartTimes.length - 1;
+    }
   }
 
   Future<void> playCurrentSurah() async {
@@ -27,13 +67,13 @@ class AudioService {
     final reader = _settings.selectedReader;
     if (reader == null) return;
 
-    // لو السورة نفسها مش شغالة بالفعل
     if (_player.state == PlayerState.paused ||
         _player.state == PlayerState.playing) {
-      // لو هي متوقفة مؤقتًا وعايز تكمل
       await _player.resume();
       return;
     }
+
+    await _loadAyahTimings();
 
     String baseUrl = reader.moshaf[0].server;
     String formattedNumber = currentSurahNumber.toString().padLeft(3, '0');
@@ -48,37 +88,20 @@ class AudioService {
 
     _player.onPositionChanged.listen((position) {
       positionNotifier.value = position;
+      _updateCurrentAyah(position);
     });
 
     await _player.resume();
   }
-final ValueNotifier<int> currentAyahIndexNotifier = ValueNotifier(-1);
-
-// نفترض عندك قائمة أزمنة الآيات (بالثواني) مثلًا
-List<Duration> ayahStartTimes = []; // طول القائمة = عدد الآيات
-
-void _updateCurrentAyah(Duration position) {
-  for (int i = 0; i < ayahStartTimes.length; i++) {
-    if (position < ayahStartTimes[i]) {
-      currentAyahIndexNotifier.value = i - 1;
-      return;
-    }
-  }
-  currentAyahIndexNotifier.value = ayahStartTimes.length - 1;
-}
-
-void _listenPosition() {
-  _player.onPositionChanged.listen((position) {
-    positionNotifier.value = position;
-    _updateCurrentAyah(position);
-  });
-}
 
   Future<void> pause() async => await _player.pause();
+
   Future<void> resume() async => await _player.resume();
+
   Future<void> stop() async {
     await _player.stop();
     positionNotifier.value = Duration.zero;
+    currentAyahIndexNotifier.value = -1;
   }
 
   Future<void> seek(Duration position) async {

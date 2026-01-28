@@ -7,11 +7,13 @@ class AyahItem extends StatelessWidget {
   final AyahModel ayah;
   final VoidCallback onBookmarkTap;
   final double? fontSize;
+  final bool isActive;
 
   const AyahItem({
     super.key,
     required this.ayah,
     required this.onBookmarkTap,
+    required this.isActive,
     this.fontSize,
   });
 
@@ -35,15 +37,14 @@ class AyahItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ayah.number == 1
-              ? AppColors.primaryGreen.withOpacity(0.2)
+          color: isActive
+              ? AppColors.primaryGreen.withOpacity(0.35)
               : AppColors.cardBackground,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Bookmark icon on the left
             GestureDetector(
               onTap: () {
                 onBookmarkTap();
@@ -55,7 +56,6 @@ class AyahItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Ayah text
             Expanded(
               child: Text(
                 ayah.text,
@@ -70,7 +70,6 @@ class AyahItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Verse number on the right
             Container(
               width: 30,
               height: 30,

@@ -70,7 +70,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
     // Only remove from first ayah of surahs (except Surah 9)
     if (ayah.number == 1 && ayah.surahNumber != 9) {
       String text = ayah.text;
-      
+
       // List of possible Basmala patterns
       final basmalaPatterns = [
         'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
@@ -78,17 +78,17 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
         'بسم الله الرحمن الرحيم',
         'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ',
       ];
-      
+
       for (final pattern in basmalaPatterns) {
         if (text.startsWith(pattern)) {
           text = text.substring(pattern.length).trim();
           break;
         }
       }
-      
+
       // Also try to remove it if it contains BOM character
       text = text.replaceFirst('\ufeff', '').trim();
-      
+
       return ayah.copyWith(text: text);
     }
     return ayah;
@@ -173,9 +173,9 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                       itemCount: _ayahs.length,
                       itemBuilder: (context, index) {
                         final ayah = _ayahs[index];
-                        final isFirstAyahOfSurah = index == 0 || 
+                        final isFirstAyahOfSurah = index == 0 ||
                             _ayahs[index - 1].surahNumber != ayah.surahNumber;
-                        
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -183,14 +183,17 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                             if (isFirstAyahOfSurah) ...[
                               if (index != 0) const SizedBox(height: 24),
                               Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 child: Column(
                                   children: [
                                     Text(
                                       '━━━━━━━━━━━━━━━━━━━━━',
                                       style: TextStyle(
-                                        color: AppColors.primaryGreen.withOpacity(0.5),
+                                        color: AppColors.primaryGreen
+                                            .withOpacity(0.5),
                                         fontSize: 16,
                                       ),
                                     ),
@@ -209,7 +212,8 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                                     Text(
                                       '━━━━━━━━━━━━━━━━━━━━━',
                                       style: TextStyle(
-                                        color: AppColors.primaryGreen.withOpacity(0.5),
+                                        color: AppColors.primaryGreen
+                                            .withOpacity(0.5),
                                         fontSize: 16,
                                       ),
                                     ),
@@ -231,9 +235,10 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                                 ),
                               ),
                             ],
-                            
+
                             // The ayah item
                             AyahItem(
+                              isActive: false,
                               ayah: _removeBasmalaFromFirstAyah(ayah),
                               onBookmarkTap: () {
                                 if (!mounted) return;
@@ -254,7 +259,9 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                       },
                     )
                   : PageViewMode(
-                      ayahs: _ayahs.map((ayah) => _removeBasmalaFromFirstAyah(ayah)).toList(),
+                      ayahs: _ayahs
+                          .map((ayah) => _removeBasmalaFromFirstAyah(ayah))
+                          .toList(),
                       fontSize: _settingsService.fontSize,
                     ),
     );

@@ -157,22 +157,27 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         ),
       );
 
-  Widget _buildListView() => ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: _ayahs.length,
-        itemBuilder: (context, index) {
-          final ayah = _ayahs[index];
-          return AyahItem(
-            ayah: ayah,
-            onBookmarkTap: () {
-              setState(() {
-                if (ayah.isSaved) {
-                  _savedVersesService.removeVerse(ayah);
-                } else {
-                  _savedVersesService.saveVerse(ayah);
-                }
-                _ayahs[index] = ayah.copyWith(isSaved: !ayah.isSaved);
-              });
+  Widget _buildListView() => ValueListenableBuilder<int>(
+        valueListenable: AudioService().currentAyahIndexNotifier,
+        builder: (context, currentIndex, _) {
+          return ListView.builder(
+            itemCount: _ayahs.length,
+            itemBuilder: (context, index) {
+              final ayah = _ayahs[index];
+              return AyahItem(
+                ayah: ayah,
+                isActive: index == currentIndex,
+                onBookmarkTap: () {
+                  setState(() {
+                    if (ayah.isSaved) {
+                      _savedVersesService.removeVerse(ayah);
+                    } else {
+                      _savedVersesService.saveVerse(ayah);
+                    }
+                    _ayahs[index] = ayah.copyWith(isSaved: !ayah.isSaved);
+                  });
+                },
+              );
             },
           );
         },
